@@ -1,4 +1,7 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React from 'react';
+import { useRouter } from 'next/router'
+import firebase from '../lib/firebaseClient';
+import { nanoid } from 'nanoid'
 
 // カスタムフックにしておく
 // const useDatabase = () => {
@@ -67,10 +70,18 @@ type Props = {
   userId: string;
 }
 
-export default function Home(props: Props) {
-  // const user = login();
+export default function Home({ userId }: Props) {
+  const router = useRouter()
 
-  return <div>{props.userId}</div>;
+  const createRoom = () => {
+    console.log('clicked')
+    const roomId = nanoid(10)
+    firebase.database().ref('rooms/' + roomId).set(true)
+    router.push(roomId)
+  }
+
+  return <button type="button" onClick={createRoom}>スクラムポーカーを始める</button>;
+
   // const { data: { user } } = useSWR('');
 
   // const { data, error } = useSWR('/');

@@ -74,7 +74,6 @@ export default function Home({ userId }: Props) {
   const router = useRouter()
 
   const createRoom = () => {
-    console.log('clicked')
     const roomId = nanoid(10)
     firebase.database().ref('rooms/' + roomId).set(true)
     router.push(roomId)

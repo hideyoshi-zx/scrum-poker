@@ -18,6 +18,7 @@ const useUserId = () => {
 }
 
 type User = {
+  id: string
   name: string
 }
 
@@ -29,20 +30,15 @@ const useUser = (userId: string | undefined) => {
     if (!ref) return
 
     const data = {
-      name: 'Anonymouse'
+      id: userId,
+      name: 'Anonymouse',
     }
 
     ref.on('value', snapshot => {
       if (snapshot?.val()) {
         setUser(snapshot.val())
       } else {
-        ref.set(data, error => {
-          if (error) {
-            console.error(error)
-          } else {
-            setUser(data)
-          }
-        })
+        ref.set(data)
       }
     });
 
@@ -56,13 +52,12 @@ function MyApp({ Component, pageProps }: AppProps) {
   const userId = useUserId()
   const user = useUser(userId)
 
-  if (!userId || !user) return <div>Loading...</div>
+  if (!user) return <div>Loading...</div>
 
-  const props = { userId, ...pageProps }
+  const props = { user, ...pageProps }
 
   return (
     <div>
-      <div>your name: {user.name}</div>
       <Component {...props} />
     </div>
   )

@@ -12,7 +12,9 @@ export default function Home(_props: Props) {
 
   const createRoom = () => {
     const roomId = nanoid(10)
-    firebase.database().ref('rooms/' + roomId).set(true)
+    firebase.database().ref('rooms/' + roomId).set({
+      id: roomId,
+    })
     router.push(roomId)
   }
 

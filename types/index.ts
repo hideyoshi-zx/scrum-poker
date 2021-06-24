@@ -5,5 +5,5 @@ export type User = {
 
 export type Room = {
   id: string;
-  users: { [key:string] : true };
+  players?: { [key:string] : true };
 }

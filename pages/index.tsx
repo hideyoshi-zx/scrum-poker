@@ -1,7 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router'
-import firebase from '../lib/firebaseClient';
-import { nanoid } from 'nanoid'
+import { createRoom } from '../usecases/room';
 
 type Props = {
   userId: string;
@@ -10,13 +9,10 @@ type Props = {
 export default function Home(_props: Props) {
   const router = useRouter()
 
-  const createRoom = () => {
-    const roomId = nanoid(10)
-    firebase.database().ref('rooms/' + roomId).set({
-      id: roomId,
-    })
+  const handleClick = async () => {
+    const roomId = await createRoom()
     router.push(roomId)
   }
 
-  return <button type="button" onClick={createRoom}>スクラムポーカーを始める</button>;
+  return <button type="button" onClick={handleClick}>スクラムポーカーを始める</button>;
 }

@@ -10,6 +10,7 @@ export function createRoom (): Promise<string> {
   return new Promise((resolve, reject) => {
     firebase.database().ref('rooms/' + roomId).set({
       id: roomId,
+      open: false,
     }, (error) => {
       if (error) {
         reject(error)
@@ -20,9 +21,42 @@ export function createRoom (): Promise<string> {
   })
 }
 
-export function changeCard (room: Room, user: User, card: Card): Promise<true> {
+export function changeCard (roomId: string, userId: string, card: Card): Promise<true> {
   return new Promise((resolve, reject) => {
-    firebase.database().ref(`rooms/${room.id}/players/${user.id}/card`).set(card, (error) => {
+    firebase.database().ref(`rooms/${roomId}/players/${userId}/card`).set(card, (error) => {
+      if (error) {
+        reject(error)
+      } else {
+        resolve(true)
+      }
+    })
+  })
+}
+
+export function open (room: Room) {
+  return new Promise((resolve, reject) => {
+    firebase.database().ref(`rooms/${room.id}/open`).set(true, (error) => {
+      if (error) {
+        reject(error)
+      } else {
+        resolve(true)
+      }
+    })
+  })
+}
+
+export function reset (room: Room) {
+  const playersUpdates = Object.keys(room?.players || {}).reduce((map, playerId) => {
+    map[`/players/${playerId}/card`] = ''
+    return map
+  }, {} as { [key:string]: string })
+
+  const updates = {
+    '/open': false,
+    ...playersUpdates
+  }
+  return new Promise((resolve, reject) => {
+    firebase.database().ref(`rooms/${room.id}`).update(updates, (error) => {
       if (error) {
         reject(error)
       } else {
@@ -67,7 +101,8 @@ export function joinRoom (user: User, room: Room | undefined) {
     if (isOver(room)) return setResult(failed('Over'))
 
     firebase.database().ref(`rooms/${room.id}/players/${user.id}`).set({
-      card: ''
+      id: user.id,
+      card: '',
     })
   }, [user, room])
 
@@ -83,28 +118,32 @@ export function useUsers (room: Room | undefined) {
   const refs = useUsersRef(room)
 
   useEffect(() => {
-    const promises = refs.map((ref): Promise<User> => {
-      return new Promise((resolve, reject) => {
-        ref.on('value', snapshot => {
-          if (snapshot?.val()) {
-            resolve(snapshot.val())
-          } else {
-            reject()
-          }
+    if (!refs) {
+      setResult(loading)
+    } else {
+      const promises = refs.map((ref): Promise<User> => {
+        return new Promise((resolve, reject) => {
+          ref.on('value', snapshot => {
+            if (snapshot?.val()) {
+              resolve(snapshot.val())
+            } else {
+              reject()
+            }
+          })
         })
       })
-    })
 
-    Promise.all(promises).then((users: User[]) => {
-      const map = users.reduce((map, user) => {
-        map[user.id] = user
-        return map
-      }, {} as { [key:string] : User })
+      Promise.all(promises).then((users: User[]) => {
+        const map = users.reduce((map, user) => {
+          map[user.id] = user
+          return map
+        }, {} as { [key:string] : User })
 
-      setResult(succeeded(map))
-    })
+        setResult(succeeded(map))
+      })
 
-    return () => { refs.forEach(ref => ref.off()) }
+      return () => { refs.forEach(ref => ref.off()) }
+    }
   }, [refs])
 
   return result
@@ -118,7 +157,7 @@ function useUsersRef (room: Room | undefined) {
   const players = room?.players
 
   return  useMemo(() => {
-    if (!players) return []
+    if (!players) return undefined
 
     return Object.keys(players).map(id =>
       firebase.database().ref('users/' + id)

@@ -4,13 +4,16 @@ export type User = {
 }
 
 export type Room = {
-  id: string;
+  id: string
+  open: boolean
   players?: {
-    [key:string]: {
-      id: string
-      card: Card
-    }
-  };
+    [key:string]: Player
+  }
+}
+
+export type Player = {
+  id: string
+  card: Card
 }
 
 export const CARDS = [

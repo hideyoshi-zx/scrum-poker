@@ -8,7 +8,6 @@ export default function Page({ currentUser }: PageProps) {
   const router = useRouter()
   const roomId = router.query.roomId as string
   const roomResult = useRoom(roomId)
-  // const joinResult = joinRoom(currentUser, roomResult.data)
 
   if (roomResult.error === 'NotFound') return(<div>NotFound</div>)
   if (!roomResult.data) return(<div>Loading</div>)

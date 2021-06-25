@@ -62,21 +62,13 @@ export function joinRoom (user: User, room: Room | undefined) {
   return result
 }
 
-export type Players = { [key:string] : User }
-export type PlayersResult = Result<Players, undefined>
+export type Users = { [key:string] : User }
+export type UsersResult = Result<Users, undefined>
 
-export function usePlayers (room: Room | undefined) {
-  const [result, setResult] = useState<PlayersResult>(loading)
+export function useUsers (room: Room | undefined) {
+  const [result, setResult] = useState<UsersResult>(loading)
 
-  const players = room?.players
-
-  const refs =  useMemo(() => {
-    if (!players) return []
-
-    return Object.keys(players).map(id =>
-      firebase.database().ref('users/' + id)
-    )
-  }, [players])
+  const refs = useUsersRef(room)
 
   useEffect(() => {
     setResult(loading)
@@ -94,12 +86,12 @@ export function usePlayers (room: Room | undefined) {
     })
 
     Promise.all(promises).then((users: User[]) => {
-      const players = users.reduce((map, user) => {
+      const map = users.reduce((map, user) => {
         map[user.id] = user
         return map
       }, {} as { [key:string] : User })
 
-      setResult(succeeded(players))
+      setResult(succeeded(map))
     })
 
     return () => { refs.forEach(ref => ref.off()) }
@@ -110,6 +102,18 @@ export function usePlayers (room: Room | undefined) {
 
 function useRoomRef (roomId: string) {
   return useMemo(() => firebase.database().ref('rooms/' + roomId), [roomId])
+}
+
+function useUsersRef (room: Room | undefined) {
+  const players = room?.players
+
+  return  useMemo(() => {
+    if (!players) return []
+
+    return Object.keys(players).map(id =>
+      firebase.database().ref('users/' + id)
+    )
+  }, [players])
 }
 
 function isJoined (user: User, room: Room) {

@@ -54,7 +54,7 @@ function UserListItem({ currentUser, room, player } : { currentUser: User, room:
   return <li key={user.id}>
     {user.name}
     <YouBadge user={user} currentUser={currentUser} />
-    :
+    ：
     <CardComponent room={room} player={player} currentUser={currentUser} />
   </li>
 }
@@ -71,7 +71,7 @@ function CardComponent({ room, player, currentUser }: { room: Room, player: Play
   } else if (player.id === currentUser.id) {
     return <CardSelect room={room} player={player} />
   } else {
-    return null
+    return <span>{player.card ? 'OK' : null}</span>
   }
 }
 

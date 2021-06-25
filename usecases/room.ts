@@ -1,7 +1,7 @@
 import firebase from '../utils/firebaseClient';
 import { useState, useEffect, useMemo } from 'react';
 import { nanoid } from 'nanoid'
-import { User, Room } from '../types'
+import { User, Room, Card } from '../types'
 import { Result, loading, succeeded, failed } from '../utils/result'
 
 export function createRoom (): Promise<string> {
@@ -15,6 +15,18 @@ export function createRoom (): Promise<string> {
         reject(error)
       } else {
         resolve(roomId)
+      }
+    })
+  })
+}
+
+export function changeCard (room: Room, user: User, card: Card): Promise<true> {
+  return new Promise((resolve, reject) => {
+    firebase.database().ref(`rooms/${room.id}/players/${user.id}/card`).set(card, (error) => {
+      if (error) {
+        reject(error)
+      } else {
+        resolve(true)
       }
     })
   })
@@ -39,7 +51,7 @@ export function useRoom (roomId: string) {
     });
 
     return () => { ref.off() }
-  }, [roomId])
+  }, [ref])
 
   return roomResult
 }
@@ -55,7 +67,7 @@ export function joinRoom (user: User, room: Room | undefined) {
     if (isOver(room)) return setResult(failed('Over'))
 
     firebase.database().ref(`rooms/${room.id}/players/${user.id}`).set({
-      card: 'blank'
+      card: ''
     })
   }, [user, room])
 
@@ -71,8 +83,6 @@ export function useUsers (room: Room | undefined) {
   const refs = useUsersRef(room)
 
   useEffect(() => {
-    setResult(loading)
-
     const promises = refs.map((ref): Promise<User> => {
       return new Promise((resolve, reject) => {
         ref.on('value', snapshot => {

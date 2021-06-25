@@ -1,3 +1,7 @@
+export type PageProps = {
+  currentUser: User;
+}
+
 export type User = {
   id: string
   name: string

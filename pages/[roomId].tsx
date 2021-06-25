@@ -1,15 +1,10 @@
 import React from 'react';
 import { useRouter } from 'next/router'
-import { Room, Player, User, CARDS, Card } from '../types'
+import { PageProps, Room, Player, User, CARDS, Card } from '../types'
 import { useRoom, useJoin, changeCard, open, reset } from '../usecases/room'
 import { useUser } from '../usecases/user'
 
-type Props = {
-  user: User;
-}
-
-export default function Page(props: Props) {
-  const currentUser = props.user
+export default function Page({ currentUser }: PageProps) {
   const router = useRouter()
   const roomId = router.query.roomId as string
   const roomResult = useRoom(roomId)

@@ -2,7 +2,7 @@ import firebase from '../utils/firebaseClient';
 import { useEffect, useState, useMemo } from 'react';
 import { User } from '../types';
 
-export function useUser () {
+export function useCurrentUser () {
   const [user, setUser] = useState<User>()
   const userId = useUserId()
   const ref = useMemo(() => userId && firebase.database().ref('users/' + userId), [userId])

@@ -1,14 +1,14 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
-import { useUser } from '../usecases/auth'
+import { useCurrentUser } from '../usecases/auth'
 import React from 'react'
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const user = useUser()
+  const currentUser = useCurrentUser()
 
-  if (!user) return <div>Loading...</div>
+  if (!currentUser) return <div>Loading...</div>
 
-  const props = { user, ...pageProps }
+  const props = { currentUser, ...pageProps }
 
   return (
     <div>

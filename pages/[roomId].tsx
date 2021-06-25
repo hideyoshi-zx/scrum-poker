@@ -1,48 +1,67 @@
 import React from 'react';
 import { useRouter } from 'next/router'
 import { Room, Player, User, CARDS, Card } from '../types'
-import { useRoom, joinRoom, useUsers, changeCard, open, reset, Users } from '../usecases/room'
+import { useRoom, useJoin, changeCard, open, reset } from '../usecases/room'
+import { useUser } from '../usecases/user'
 
 type Props = {
   user: User;
 }
 
-export default function Home(props: Props) {
+export default function Page(props: Props) {
   const currentUser = props.user
   const router = useRouter()
   const roomId = router.query.roomId as string
   const roomResult = useRoom(roomId)
-  const joinResult = joinRoom(currentUser, roomResult.data)
-  const usersResult = useUsers(roomResult.data)
+  // const joinResult = joinRoom(currentUser, roomResult.data)
 
   if (roomResult.error === 'NotFound') return(<div>NotFound</div>)
-  if (joinResult.error === 'Over') return(<div>Over</div>)
-  if (!roomResult.data || !joinResult.data || !usersResult.data) return(<div>Loading...</div>)
+  if (!roomResult.data) return(<div>Loading</div>)
 
   const room = roomResult.data
+  const players = room.players || {}
+  const isJoined = players[currentUser.id]
+
+  if (!isJoined) return <Joining currentUser={currentUser} room={room} />
+
   return (
     <div>
       <div>id: {roomId}</div>
-      <UsersList currentUser={currentUser} room={room} users={usersResult.data} />
+      <UsersList currentUser={currentUser} room={room} />
       <Action room={room} />
     </div>
   )
 }
 
-function UsersList({ currentUser, room, users }: { currentUser: User, room: Room, users: Users }) {
-  const players = room?.players || []
-  const usersListItem = Object.values(players).map(player => {
-    const user = users[player.id]
+function Joining({ currentUser, room }: { currentUser: User, room: Room }) {
+  const joinResult = useJoin(currentUser, room)
 
-    return <li key={user.id}>
-      {user.name}
-      <YouBadge user={user} currentUser={currentUser} />
-      :
-      <CardComponent room={room} player={player} currentUser={currentUser} />
-    </li>
+  if (joinResult.error === 'Over') return <div>Over</div>
+
+  return <div>Joining</div>
+}
+
+function UsersList({ currentUser, room }: { currentUser: User, room: Room }) {
+  const players = room?.players || {}
+
+  const usersListItem = Object.values(players).map(player => {
+    return <UserListItem key={player.id} currentUser={currentUser} room={room} player={player} />
   })
 
   return <ul>{usersListItem}</ul>
+}
+
+function UserListItem({ currentUser, room, player } : { currentUser: User, room: Room, player: Player }) {
+  const user = useUser(player.id)
+
+  if (!user) return null
+
+  return <li key={user.id}>
+    {user.name}
+    <YouBadge user={user} currentUser={currentUser} />
+    :
+    <CardComponent room={room} player={player} currentUser={currentUser} />
+  </li>
 }
 
 function YouBadge({ user, currentUser }: { user: User, currentUser: User }) {

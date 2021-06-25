@@ -92,81 +92,23 @@ export function useRoom (roomId: string) {
 
 export type JoinResult = Result<true, 'Over'>
 
-export function joinRoom (user: User, room: Room | undefined) {
+export function useJoin (user: User, room: Room) {
   const [result, setResult] = useState<JoinResult>(loading)
 
   useEffect(() => {
-    if (!room) return setResult(loading)
-    if (isJoined(user, room)) return setResult(succeeded(true))
     if (isOver(room)) return setResult(failed('Over'))
 
     firebase.database().ref(`rooms/${room.id}/players/${user.id}`).set({
       id: user.id,
       card: '',
     })
-  }, [user, room])
-
-  return result
-}
-
-export type Users = { [key:string] : User }
-export type UsersResult = Result<Users, undefined>
-
-export function useUsers (room: Room | undefined) {
-  const [result, setResult] = useState<UsersResult>(loading)
-
-  const refs = useUsersRef(room)
-
-  useEffect(() => {
-    if (!refs) {
-      setResult(loading)
-    } else {
-      const promises = refs.map((ref): Promise<User> => {
-        return new Promise((resolve, reject) => {
-          ref.on('value', snapshot => {
-            if (snapshot?.val()) {
-              resolve(snapshot.val())
-            } else {
-              reject()
-            }
-          })
-        })
-      })
-
-      Promise.all(promises).then((users: User[]) => {
-        const map = users.reduce((map, user) => {
-          map[user.id] = user
-          return map
-        }, {} as { [key:string] : User })
-
-        setResult(succeeded(map))
-      })
-
-      return () => { refs.forEach(ref => ref.off()) }
-    }
-  }, [refs])
+  }, [user.id, room.id])
 
   return result
 }
 
 function useRoomRef (roomId: string) {
   return useMemo(() => firebase.database().ref('rooms/' + roomId), [roomId])
-}
-
-function useUsersRef (room: Room | undefined) {
-  const players = room?.players
-
-  return  useMemo(() => {
-    if (!players) return undefined
-
-    return Object.keys(players).map(id =>
-      firebase.database().ref('users/' + id)
-    )
-  }, [players])
-}
-
-function isJoined (user: User, room: Room) {
-  return room.players && room.players[user.id]
 }
 
 function isOver (room: Room) {

@@ -98,10 +98,21 @@ export function useJoin (user: User, room: Room) {
   useEffect(() => {
     if (isOver(room)) return setResult(failed('Over'))
 
-    firebase.database().ref(`rooms/${room.id}/players/${user.id}`).set({
+    const ref = firebase.database().ref(`rooms/${room.id}/players/${user.id}`)
+    const defaultPlayer = {
       id: user.id,
       card: '',
-    })
+    }
+
+    firebase.database().ref('.info/connected').on('value', (snapshot) => {
+        if (snapshot.val() == false) {
+            return
+        }
+
+      ref.onDisconnect().set(null).then(() => {
+        ref.set(defaultPlayer)
+      })
+    });
   }, [user.id, room.id])
 
   return result

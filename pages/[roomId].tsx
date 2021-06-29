@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router'
 import { PageProps, Room, Player, CARDS, Card } from '../types'
-import { useUid } from '../usecases/auth'
-import { useRoom, addPlayer, changeCard, open, reset, isJoined } from '../usecases/room'
+import { useUid } from '../hooks/auth'
+import { useRoom } from '../hooks/room'
+import { addPlayer, changeCard, open, reset, isJoined } from '../services/room'
 
 export default function Page(_props: PageProps) {
   const uid = useUid()

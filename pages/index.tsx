@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router'
-import { createRoom } from '../usecases/room';
+import { createRoom } from '../services/room';
 import { PageProps } from '../types';
 
 export default function Home(_props: PageProps) {

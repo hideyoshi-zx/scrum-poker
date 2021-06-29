@@ -1,8 +1,6 @@
-import firebase from '../utils/firebaseClient';
-import { useState, useEffect, useMemo } from 'react';
+import firebase from '../services/firebase';
 import { nanoid } from 'nanoid'
 import { Room, Card } from '../types'
-import { Result, loading, succeeded, failed } from '../utils/result'
 
 export function createRoom (): Promise<string> {
   const roomId = nanoid(10)
@@ -88,35 +86,7 @@ export function reset (room: Room) {
   })
 }
 
-export type RoomResult = Result<Room, 'NotFound'>
-
-export function useRoom (roomId: string) {
-  const [roomResult, setRoomResult] = useState<RoomResult>(loading)
-  const ref = useRoomRef(roomId)
-
-  useEffect(() => {
-    setRoomResult(loading)
-    if (!ref) return
-
-    ref.on('value', snapshot => {
-      if (snapshot?.val()) {
-        setRoomResult(succeeded(snapshot.val()))
-      } else {
-        setRoomResult(failed('NotFound'))
-      }
-    });
-
-    return () => { ref.off() }
-  }, [ref])
-
-  return roomResult
-}
-
 export function isJoined (room: Room, uid: string) {
   const players = room.players || {}
   return !!players[uid]
-}
-
-function useRoomRef (roomId: string) {
-  return useMemo(() => firebase.database().ref('rooms/' + roomId), [roomId])
 }

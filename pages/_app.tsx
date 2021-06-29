@@ -3,11 +3,8 @@ import type { AppProps } from 'next/app'
 import { useUserId, useCurrentUser, createUser } from '../usecases/auth'
 import React, { useState } from 'react'
 
-export default function MyApp(props : AppProps) {
-  const userId = useUserId()
-  if (!userId) return <div>Loading...</div>
-
-  return <LoggedIn {...props} userId={userId} />
+export default function MyApp({ Component, pageProps }: AppProps) {
+  return <Component {...pageProps} />
 }
 
 function LoggedIn ({ Component, pageProps, userId } : AppProps & { userId : string }) {
@@ -19,24 +16,5 @@ function LoggedIn ({ Component, pageProps, userId } : AppProps & { userId : stri
     <div>
       <Component {...pageProps} currentUser={currentUserResult.data} />
     </div>
-  )
-}
-
-function UserForm ({ userId } : { userId : string }) {
-  const [name, setName] = useState('')
-
-  const handleChange = (event : React.ChangeEvent<HTMLInputElement>) => {
-    setName(event.target.value)
-  }
-
-  const handleSubmit = (event : React.FormEvent<HTMLFormElement>) => {
-    createUser(userId, name)
-    event.preventDefault()
-  }
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input type="text" value={name} onChange={handleChange} placeholder="Input your name" />
-    </form>
   )
 }

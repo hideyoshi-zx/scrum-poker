@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router'
-import { PageProps, Room, Player, User, CARDS, Card } from '../types'
-import { useRoom, useJoin, changeCard, open, reset } from '../usecases/room'
-import { useUser } from '../usecases/user'
+import { PageProps, Room, Player, CARDS, Card } from '../types'
+import { useUid } from '../usecases/auth'
+import { useRoom, addPlayer, changeCard, open, reset, isJoined } from '../usecases/room'
 
-export default function Page({ currentUser }: PageProps) {
+export default function Page(_props: PageProps) {
+  const uid = useUid()
+
+  if (!uid) return <div>Loading</div>
+
+  return <LoggedIn uid={uid} />
+}
+
+function LoggedIn({ uid }: { uid: string }) {
   const router = useRouter()
   const roomId = router.query.roomId as string
   const roomResult = useRoom(roomId)
@@ -13,61 +21,66 @@ export default function Page({ currentUser }: PageProps) {
   if (!roomResult.data) return(<div>Loading</div>)
 
   const room = roomResult.data
-  const players = room.players || {}
-  const isJoined = players[currentUser.id]
 
-  if (!isJoined) return <Joining currentUser={currentUser} room={room} />
+  if (!isJoined(room, uid)) return <JoinForm room={room} uid={uid} />
 
   return (
     <div>
       <div>id: {roomId}</div>
-      <UsersList currentUser={currentUser} room={room} />
+      <PlayersList uid={uid} room={room} />
       <Action room={room} />
     </div>
   )
 }
 
-function Joining({ currentUser, room }: { currentUser: User, room: Room }) {
-  const joinResult = useJoin(currentUser, room)
+function JoinForm({ room, uid }: { room: Room, uid: string }) {
+  const [name, setName] = useState('')
 
-  if (joinResult.error === 'Over') return <div>Over</div>
+  const handleChange = (event : React.ChangeEvent<HTMLInputElement>) => {
+    setName(event.target.value)
+  }
 
-  return <div>Joining</div>
+  const handleSubmit = (event : React.FormEvent<HTMLFormElement>) => {
+    addPlayer(room, uid, name)
+    event.preventDefault();
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input type="text" value={name} onChange={handleChange} placeholder="Input your name" />
+    </form>
+  )
 }
 
-function UsersList({ currentUser, room }: { currentUser: User, room: Room }) {
+function PlayersList({ uid, room }: { uid: string, room: Room }) {
   const players = room?.players || {}
 
-  const usersListItem = Object.values(players).map(player => {
-    return <UserListItem key={player.id} currentUser={currentUser} room={room} player={player} />
+  const playersListItem = Object.values(players).map(player => {
+    return <PlayersListItem key={player.uid} uid={uid} room={room} player={player} />
   })
 
-  return <ul>{usersListItem}</ul>
+  return <ul>{playersListItem}</ul>
 }
 
-function UserListItem({ currentUser, room, player } : { currentUser: User, room: Room, player: Player }) {
-  const user = useUser(player.id)
-
-  if (!user) return null
-
-  return <li key={user.id}>
-    {user.name}
-    <YouBadge user={user} currentUser={currentUser} />
+function PlayersListItem({ uid, room, player } : { uid: string, room: Room, player: Player }) {
+  return <li key={player.uid}>
+    {player.name}
+    <YouBadge player={player} uid={uid} />
     ：
-    <CardComponent room={room} player={player} currentUser={currentUser} />
+    <CardComponent room={room} player={player} uid={uid} />
   </li>
 }
 
-function YouBadge({ user, currentUser }: { user: User, currentUser: User }) {
-  if (user.id !== currentUser.id) return null
+function YouBadge({ player, uid }: { player: Player, uid: string }) {
+  if (player.uid !== uid) return null
 
   return <em>(You)</em>
 }
 
-function CardComponent({ room, player, currentUser }: { room: Room, player: Player, currentUser: User }) {
+function CardComponent({ room, player, uid }: { room: Room, player: Player, uid: string }) {
   if (room.open) {
     return <span>{player.card}</span>
-  } else if (player.id === currentUser.id) {
+  } else if (player.uid === uid) {
     return <CardSelect room={room} player={player} />
   } else {
     return <span>{player.card ? 'OK' : null}</span>
@@ -81,7 +94,7 @@ function CardSelect({ room, player }: { room: Room, player: Player }) {
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value as Card
-    changeCard(room.id, player.id, value)
+    changeCard(room.id, player.uid, value)
   }
 
   return <select value={player.card} onChange={handleChange}>{cardOptions}</select>

@@ -1,10 +1,5 @@
 export type PageProps = {
-  currentUser: User;
-}
-
-export type User = {
-  id: string
-  name: string
+  uid: string;
 }
 
 export type Room = {
@@ -16,7 +11,8 @@ export type Room = {
 }
 
 export type Player = {
-  id: string
+  uid: string
+  name: string
   card: Card
 }
 

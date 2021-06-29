@@ -1,7 +1,7 @@
 import firebase from '../utils/firebaseClient';
 import { useState, useEffect, useMemo } from 'react';
 import { nanoid } from 'nanoid'
-import { User, Room, Card } from '../types'
+import { Room, Card } from '../types'
 import { Result, loading, succeeded, failed } from '../utils/result'
 
 export function createRoom (): Promise<string> {
@@ -18,6 +18,28 @@ export function createRoom (): Promise<string> {
         resolve(roomId)
       }
     })
+  })
+}
+
+export function addPlayer (room: Room, uid: string, name: string) {
+  const ref = firebase.database().ref(`rooms/${room.id}/players/${uid}`)
+
+  return new Promise((resolve, reject) => {
+    firebase.database().ref('.info/connected').on('value', (snapshot) => {
+      if (snapshot.val() == false) {
+        return
+      }
+
+      ref.onDisconnect().set(null).then(() => {
+        ref.set({
+          uid,
+          name,
+          card: '',
+        }, (error) => {
+          error ? reject(error) : resolve(true)
+        })
+      })
+    });
   })
 }
 
@@ -90,38 +112,11 @@ export function useRoom (roomId: string) {
   return roomResult
 }
 
-export type JoinResult = Result<true, 'Over'>
-
-export function useJoin (user: User, room: Room) {
-  const [result, setResult] = useState<JoinResult>(loading)
-
-  useEffect(() => {
-    if (isOver(room)) return setResult(failed('Over'))
-
-    const ref = firebase.database().ref(`rooms/${room.id}/players/${user.id}`)
-    const defaultPlayer = {
-      id: user.id,
-      card: '',
-    }
-
-    firebase.database().ref('.info/connected').on('value', (snapshot) => {
-        if (snapshot.val() == false) {
-            return
-        }
-
-      ref.onDisconnect().set(null).then(() => {
-        ref.set(defaultPlayer)
-      })
-    });
-  }, [user.id, room.id])
-
-  return result
+export function isJoined (room: Room, uid: string) {
+  const players = room.players || {}
+  return !!players[uid]
 }
 
 function useRoomRef (roomId: string) {
   return useMemo(() => firebase.database().ref('rooms/' + roomId), [roomId])
-}
-
-function isOver (room: Room) {
-  return room.players && Object.keys(room.players).length >= 8
 }

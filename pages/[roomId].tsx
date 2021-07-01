@@ -4,6 +4,7 @@ import { PageProps, Room, Player, CARDS, Card } from '../types'
 import { useUid } from '../hooks/auth'
 import { useRoom } from '../hooks/room'
 import { addPlayer, changeCard, open, reset, isJoined } from '../services/room'
+import CreatePlayerModal from '../components/CreatePlayerModal'
 
 export default function Page(_props: PageProps) {
   const uid = useUid()
@@ -23,34 +24,26 @@ function LoggedIn({ uid }: { uid: string }) {
 
   const room = roomResult.data
 
-  if (!isJoined(room, uid)) return <JoinForm room={room} uid={uid} />
-
   return (
-    <div>
-      <div>id: {roomId}</div>
-      <PlayersList uid={uid} room={room} />
-      <Action room={room} />
-    </div>
+    <>
+      <JoinModal room={room} uid={uid} />
+      <div>
+        <div>id: {roomId}</div>
+        <PlayersList uid={uid} room={room} />
+        <Action room={room} />
+      </div>
+    </>
   )
 }
 
-function JoinForm({ room, uid }: { room: Room, uid: string }) {
-  const [name, setName] = useState('')
+function JoinModal({ room, uid }: { room: Room, uid: string }) {
+  const open = !isJoined(room, uid)
 
-  const handleChange = (event : React.ChangeEvent<HTMLInputElement>) => {
-    setName(event.target.value)
+  const handleSubmit = async (name: string) => {
+    await addPlayer(room, uid, name)
   }
 
-  const handleSubmit = (event : React.FormEvent<HTMLFormElement>) => {
-    addPlayer(room, uid, name)
-    event.preventDefault();
-  }
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input type="text" value={name} onChange={handleChange} placeholder="Input your name" />
-    </form>
-  )
+  return <CreatePlayerModal open={open} onSubmit={handleSubmit} />
 }
 
 function PlayersList({ uid, room }: { uid: string, room: Room }) {

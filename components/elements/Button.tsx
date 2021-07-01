@@ -6,15 +6,15 @@ const STATE_CLASS_NAMES = {
 const SIZE_CLASS_NAMES = {
   xs: {
     button: 'px-2.5 py-1.5 text-xs rounded',
-    spinner: 'h-5 w-5',
+    spinner: 'h-4 w-4',
   },
   sm: {
     button: 'px-3 py-2 text-sm rounded-md',
-    spinner: 'h-5 w-5',
+    spinner: 'h-4 w-4',
   },
   md: {
     button: 'px-4 py-2 text-sm rounded-md',
-    spinner: 'h-5 w-5',
+    spinner: 'h-4 w-4',
   },
   lg: {
     button: 'px-4 py-2 text-base rounded-md',

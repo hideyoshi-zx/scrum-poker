@@ -1,29 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router'
 import { PageProps, Room, Player, CARDS, Card } from '../types'
 import { useUid } from '../hooks/auth'
 import { useRoom } from '../hooks/room'
 import { addPlayer, changeCard, open, reset, isJoined } from '../services/room'
 import CreatePlayerModal from '../components/CreatePlayerModal'
+import OverlaySpinner from '../components/OverlaySpinner'
 
 export default function Page(_props: PageProps) {
   const uid = useUid()
+  const [loading, setLoading] = useState(true)
 
-  if (!uid) return <div>Loading</div>
-
-  return <LoggedIn uid={uid} />
+  return (
+    <>
+      { uid && <LoggedIn uid={uid} onLoaded={() => setLoading(false)} /> }
+      <OverlaySpinner show={!uid || loading} />
+    </>
+  )
 }
 
-function LoggedIn({ uid }: { uid: string }) {
+function LoggedIn({ uid, onLoaded }: { uid: string, onLoaded: () => any }) {
   const router = useRouter()
   const roomId = router.query.roomId as string
   const roomResult = useRoom(roomId)
+  useEffect(() => { roomResult.data && onLoaded() }, [roomResult])
 
   if (roomResult.error === 'NotFound') return(<div>NotFound</div>)
-  if (!roomResult.data) return(<div>Loading</div>)
 
   const room = roomResult.data
 
+  if (!room) return null
   return (
     <>
       <JoinModal room={room} uid={uid} />

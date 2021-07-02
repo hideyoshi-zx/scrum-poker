@@ -18,7 +18,7 @@ export default function OverlaySpinner ({ show }: Props) {
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
       >
-        <div className="fixed inset-0 h-screen w-screen flex items-center justify-center bg-white bg-opacity-95">
+        <div className="z-20 fixed inset-0 h-screen w-screen flex items-center justify-center bg-white">
           <svg className="spinner text-blue-400" viewBox="0 0 50 50">
             <circle className="path" cx="25" cy="25" r="20" fill="none" strokeWidth="5"></circle>
           </svg>

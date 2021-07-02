@@ -25,7 +25,7 @@ export default function CreatePlayerModal({ open, onSubmit }: Props) {
   }
 
   return (
-    <Transition.Root show={open} as={Fragment} beforeLeave={() => setLeaving(true)} afterLeave={() => setLeaving(false)}>
+    <Transition.Root show={open} as={Fragment} appear beforeLeave={() => setLeaving(true)} afterLeave={() => setLeaving(false)}>
       <Dialog as="div" static className="fixed z-10 inset-0 overflow-y-auto" open={open} onClose={() => {}}>
         <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
           <Transition.Child

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router'
-import { PageProps, Room, Player, CARDS, Card } from '../types'
+import { PageProps, Room, Player, Card } from '../types'
 import { useUid } from '../hooks/auth'
 import { useRoom } from '../hooks/room'
 import { addPlayer, changeCard, open, reset, isJoined } from '../services/room'
 import CreatePlayerModal from '../components/CreatePlayerModal'
 import OverlaySpinner from '../components/OverlaySpinner'
 import CardSelect from '../components/CardSelect'
+import PokerTable from  '../components/PokerTable'
 
 export default function Page(_props: PageProps) {
   const uid = useUid()
@@ -45,7 +46,12 @@ function LoggedIn({ uid, onLoaded }: { uid: string, onLoaded: () => any }) {
         <div>id: {roomId}</div>
         <PlayersList uid={uid} room={room} />
         <Action room={room} />
-        { player && <CardSelect selected={player.card} onChange={handleChange} /> }
+          <PokerTable />
+        { player &&
+          <div className="mt-16">
+            <CardSelect selected={player.card} onChange={handleChange} />
+          </div>
+        }
       </div>
     </>
   )

@@ -11,7 +11,7 @@ export default function CardSelect ({ selected, onChange }: Props) {
     <>
       <p className="text-center text-gray-500">Choose your card</p>
       <div className="mt-4 w-min mx-auto flex justify-center py-4 px-6 space-x-4 bg-white rounded">
-        { CARDS.map(card => <CardButton card={card} selected={selected} onClick={onChange} />) }
+        { CARDS.map(card => <CardButton key={card} card={card} selected={selected} onClick={onChange} />) }
       </div>
     </>
   )

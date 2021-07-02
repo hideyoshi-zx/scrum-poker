@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { useRouter } from 'next/router'
 import { PageProps, Room, Card } from '../types'
 import { useUid } from '../hooks/auth'
@@ -8,6 +8,7 @@ import CreatePlayerModal from '../components/CreatePlayerModal'
 import OverlaySpinner from '../components/OverlaySpinner'
 import CardSelect from '../components/CardSelect'
 import PokerTable from  '../components/PokerTable'
+import { Transition } from '@headlessui/react'
 
 export default function Page(_props: PageProps) {
   const uid = useUid()
@@ -48,9 +49,20 @@ function LoggedIn({ uid, onLoaded }: { uid: string, onLoaded: () => any }) {
       <div className="py-16">
         <PokerTable room={room} showCards={showCards} voteNext={voteNext} />
         { player &&
-          <div className="mt-12">
-            <CardSelect selected={player.card} onChange={handleChange} />
-          </div>
+          <Transition
+            show={!room.open}
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="mt-12">
+              <CardSelect selected={player.card} onChange={handleChange} />
+            </div>
+          </Transition>
         }
       </div>
     </>

@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import Button from '../components/elements/Button'
 import { EyeIcon, RefreshIcon } from '@heroicons/react/outline'
 import { Room, Player } from '../types'
+import { Transition } from '@headlessui/react'
 
 type Props = {
   room: Room
@@ -53,27 +54,32 @@ function PlayerBox ({ room, player }: { room: Room, player: Player | undefined }
 }
 
 function PlayerCard ({ room, player }: { room: Room, player: Player }) {
-  const baseClass = 'mx-auto flex items-center justify-center h-14 w-10 text-lg font-bold rounded'
+  const baseClass = 'flex items-center justify-center text-lg font-bold rounded'
 
   if (!player.card) {
     return (
-      <div className={`${baseClass} bg-gray-100 border-2 border-dashed border-gray-300`}>
+      <div className={`${baseClass} mx-auto h-14 w-10 bg-gray-100 border-2 border-dashed border-gray-300`}>
       </div>
     )
   }
 
-  if (room.open) {
-    return (
-      <div className={`${baseClass} shadow-sm border-2 border-blue-200 text-blue-500 bg-blue-100`}>
+  const cardClass = 'w-full h-full backface-visibility-hidden absolute transition-all duration-500 shadow-sm'
+  const frontStyle = {
+    transform: `rotateY(${room.open ? '0' : '180'}deg)`
+  }
+  const backStyle = {
+    transform: `rotateY(${room.open ? '-180' : '0'}deg)`
+  }
+
+  return (
+    <div className="relative mx-auto h-14 w-10">
+      <div className={`${baseClass} ${cardClass} border-2 border-blue-200 text-blue-500 bg-blue-100`} style={frontStyle}>
         { player.card }
       </div>
-    )
-  } else {
-    return (
-      <div className={`${baseClass} shadow-sm border border-white bg-blue-400 heropattern-diagonallines-blue-500`}>
+      <div className={`${baseClass} ${cardClass} border border-white bg-blue-400 heropattern-diagonallines-blue-500`} style={backStyle}>
       </div>
-    )
-  }
+    </div>
+  )
 }
 
 function ActionButton ({ room, showCards, voteNext }: { room: Room, showCards: () => any, voteNext: () => any }) {

@@ -6,6 +6,7 @@ import { useRoom } from '../hooks/room'
 import { addPlayer, changeCard, open, reset, isJoined } from '../services/room'
 import CreatePlayerModal from '../components/CreatePlayerModal'
 import OverlaySpinner from '../components/OverlaySpinner'
+import CardSelect from '../components/CardSelect'
 
 export default function Page(_props: PageProps) {
   const uid = useUid()
@@ -30,6 +31,13 @@ function LoggedIn({ uid, onLoaded }: { uid: string, onLoaded: () => any }) {
   const room = roomResult.data
 
   if (!room) return null
+
+  const handleChange = (card: Card) => {
+    changeCard(room.id, uid, card)
+  }
+
+  const player = (room.players || {})[uid]
+
   return (
     <>
       <JoinModal room={room} uid={uid} />
@@ -37,6 +45,7 @@ function LoggedIn({ uid, onLoaded }: { uid: string, onLoaded: () => any }) {
         <div>id: {roomId}</div>
         <PlayersList uid={uid} room={room} />
         <Action room={room} />
+        { player && <CardSelect selected={player.card} onChange={handleChange} /> }
       </div>
     </>
   )
@@ -80,24 +89,9 @@ function YouBadge({ player, uid }: { player: Player, uid: string }) {
 function CardComponent({ room, player, uid }: { room: Room, player: Player, uid: string }) {
   if (room.open) {
     return <span>{player.card}</span>
-  } else if (player.uid === uid) {
-    return <CardSelect room={room} player={player} />
   } else {
     return <span>{player.card ? 'OK' : null}</span>
   }
-}
-
-function CardSelect({ room, player }: { room: Room, player: Player }) {
-  const cardOptions = CARDS.map(card =>
-    <option key={card} value={card}>{card}</option>
-  )
-
-  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = event.target.value as Card
-    changeCard(room.id, player.uid, value)
-  }
-
-  return <select value={player.card} onChange={handleChange}>{cardOptions}</select>
 }
 
 function Action({ room }: { room: Room }) {

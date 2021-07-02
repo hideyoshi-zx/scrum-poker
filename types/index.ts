@@ -17,13 +17,17 @@ export type Player = {
 }
 
 export const CARDS = [
-  '',
   '0',
   '1',
   '2',
   '3',
   '5',
   '8',
+  '13',
+  '21',
+  '34',
+  '55',
+  '89',
   '?',
 ] as const
 export type Card = typeof CARDS[number]  ;

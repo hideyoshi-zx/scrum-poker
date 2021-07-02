@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router'
-import { PageProps, Room, Player, Card } from '../types'
+import { PageProps, Room, Card } from '../types'
 import { useUid } from '../hooks/auth'
 import { useRoom } from '../hooks/room'
 import { addPlayer, changeCard, open, reset, isJoined } from '../services/room'
@@ -39,16 +39,16 @@ function LoggedIn({ uid, onLoaded }: { uid: string, onLoaded: () => any }) {
 
   const player = (room.players || {})[uid]
 
+  const showCards = () => { open(room) }
+  const voteNext = () => { reset(room) }
+
   return (
     <>
       <JoinModal room={room} uid={uid} />
-      <div>
-        <div>id: {roomId}</div>
-        <PlayersList uid={uid} room={room} />
-        <Action room={room} />
-          <PokerTable />
+      <div className="py-16">
+        <PokerTable room={room} showCards={showCards} voteNext={voteNext} />
         { player &&
-          <div className="mt-16">
+          <div className="mt-12">
             <CardSelect selected={player.card} onChange={handleChange} />
           </div>
         }
@@ -65,45 +65,4 @@ function JoinModal({ room, uid }: { room: Room, uid: string }) {
   }
 
   return <CreatePlayerModal open={open} onSubmit={handleSubmit} />
-}
-
-function PlayersList({ uid, room }: { uid: string, room: Room }) {
-  const players = room?.players || {}
-
-  const playersListItem = Object.values(players).map(player => {
-    return <PlayersListItem key={player.uid} uid={uid} room={room} player={player} />
-  })
-
-  return <ul>{playersListItem}</ul>
-}
-
-function PlayersListItem({ uid, room, player } : { uid: string, room: Room, player: Player }) {
-  return <li key={player.uid}>
-    {player.name}
-    <YouBadge player={player} uid={uid} />
-    ：
-    <CardComponent room={room} player={player} uid={uid} />
-  </li>
-}
-
-function YouBadge({ player, uid }: { player: Player, uid: string }) {
-  if (player.uid !== uid) return null
-
-  return <em>(You)</em>
-}
-
-function CardComponent({ room, player, uid }: { room: Room, player: Player, uid: string }) {
-  if (room.open) {
-    return <span>{player.card}</span>
-  } else {
-    return <span>{player.card ? 'OK' : null}</span>
-  }
-}
-
-function Action({ room }: { room: Room }) {
-  if (room.open) {
-    return <button onClick={() => { reset(room) }}>Reset</button>
-  } else {
-    return <button onClick={() => { open(room) }}>Open</button>
-  }
 }

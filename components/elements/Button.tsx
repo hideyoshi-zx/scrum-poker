@@ -1,7 +1,7 @@
 const BASE_CLASS_NAME = 'inline-flex items-center justify-center border font-medium shadow-sm'
 const STATE_CLASS_NAMES = {
-  normal: 'hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
-  disabled: 'cursor-not-allowed bg-opacity-50',
+  normal: 'focus:outline-none focus:ring-2 focus:ring-offset-2',
+  disabled: 'bg-opacity-50 pointer-events-none',
 }
 const SIZE_CLASS_NAMES = {
   xs: {
@@ -31,7 +31,11 @@ const SIZE_CLASS_NAMES = {
 }
 const VARIANT_CLASS_NAMES = {
   primary: {
-    button: 'border-transparent text-white bg-blue-600',
+    button: 'border-transparent text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
+    spinner: 'text-white'
+  },
+  secondary: {
+    button: 'border-transparent text-blue-700 bg-blue-100 hover:bg-blue-200 focus:ring-blue-500',
     spinner: 'text-white'
   },
 }

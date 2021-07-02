@@ -64,7 +64,7 @@ function PlayerCard ({ room, player }: { room: Room, player: Player }) {
 
   if (room.open) {
     return (
-      <div className={`${baseClass} shadow-sm border-2 border-blue-100 text-blue-500 bg-blue-50`}>
+      <div className={`${baseClass} shadow-sm border-2 border-blue-200 text-blue-500 bg-blue-100`}>
         { player.card }
       </div>
     )

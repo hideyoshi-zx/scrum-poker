@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { useEffect, useState } from 'react'
 import Button from '../components/elements/Button'
 import { EyeIcon, RefreshIcon } from '@heroicons/react/outline'
 import { Room, Player } from '../types'
@@ -83,12 +83,32 @@ function PlayerCard ({ room, player }: { room: Room, player: Player }) {
 }
 
 function ActionButton ({ room, showCards, voteNext }: { room: Room, showCards: () => any, voteNext: () => any }) {
+  const [idling, setIdling] = useState(false)
+  useEffect(() => {
+    if (room.open) {
+      setIdling(true)
+      setTimeout(() => {
+        setIdling(false)
+      }, 500)
+    }
+  }, [room.open])
+
+  if (idling) return null
+
   if (room.open) {
     return (
-      <Button onClick={voteNext} variant="secondary">
-        <RefreshIcon className="h-5 w-5 text-blue-500 mr-2" aria-hidden="true" />
-        Vote next
-      </Button>
+      <Transition
+        show={true}
+        appear
+        enter="ease-out duration-300"
+        enterFrom="opacity-0"
+        enterTo="opacity-100"
+      >
+        <Button onClick={voteNext} variant="secondary">
+          <RefreshIcon className="h-5 w-5 text-blue-500 mr-2" aria-hidden="true" />
+          Vote next
+        </Button>
+      </Transition>
     )
   } else {
     const players = Object.values(room.players || {})

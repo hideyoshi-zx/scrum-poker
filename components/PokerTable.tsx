@@ -46,7 +46,7 @@ function PlayerBox ({ room, player }: { room: Room, player: Player | undefined }
   return (
     <div className="w-24">
       <PlayerCard room={room} player={player} />
-      <div className="mt-1 mx-auto px-2 w-min text-center truncate text-gray-500 font-bold">
+      <div className="mt-1 mx-auto px-2 w-full text-center truncate text-gray-500 font-bold">
         { player.name }
       </div>
     </div>

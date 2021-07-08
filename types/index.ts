@@ -30,5 +30,6 @@ export const CARDS = [
   '89',
   '?',
   '山口',
+  '茂',
 ] as const
 export type Card = typeof CARDS[number]  ;

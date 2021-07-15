@@ -29,5 +29,6 @@ export const CARDS = [
   '55',
   '89',
   '?',
+  '☕️',
 ] as const
 export type Card = typeof CARDS[number]  ;
